@@ -22,6 +22,10 @@ pageEncoding="UTF-8"%>
 <td>${m.detail}</td>
 <td>${m.love}</td>
 <td>${m.post_date}</td>
+ <td>
+            <a href="/updateForm/${m.id}">แก้ไข</a>
+            <a href="/deleteForum/${m.id}">ลบ</a>
+</td>
 </tr>
 </c:forEach>
 </table>
