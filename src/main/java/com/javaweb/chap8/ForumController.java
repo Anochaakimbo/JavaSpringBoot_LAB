@@ -22,8 +22,8 @@ public class ForumController {
 	@Autowired
 	ForumInterfaceRepository repo;
 	
-	@GetMapping("/insertForum")
-	public String saveForum() {
+	@GetMapping("/insertF")
+	public String saveForum1() {
 		Date d = new Date();
 		Forum f = new Forum();
 		f.setDetail("OK HOW ARE WE TODAY");
@@ -33,6 +33,19 @@ public class ForumController {
 		repo.save(f);
 		return "Add successfully";
 	}
+	
+	@GetMapping("/insertForum")
+	public String saveForum(@RequestParam("detail") String detail,@RequestParam("author") String author,Model m) {
+	    Date d = new Date();
+	    Forum f = new Forum();
+	    f.setDetail(detail);      
+	    f.setAuthor(author);       
+	    f.setLove(0);
+	    f.setPost_date(d);
+	    repo.save(f);               
+	    return "redirect:/showForum";
+	}
+
 	
 	@GetMapping("/showForum")
 	public String findAllForum(Model m) {
@@ -69,5 +82,15 @@ public class ForumController {
 		return "redirect:/showForum";
 		
 	}
+	@GetMapping("/loveAdd/{id}")
+	public String lovePress(@PathVariable int id, Model m) {
+	    Forum f = repo.findById(id); 
+	    if (f != null) {
+	        f.setLove(f.getLove() + 1); 
+	        repo.save(f); 
+	    }
+	    return "redirect:/showForum";
+	}
+
 }
 
