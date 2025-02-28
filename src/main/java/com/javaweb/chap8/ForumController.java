@@ -58,10 +58,19 @@ public class ForumController {
 	}
 	
 	@DeleteMapping("/forum/{id}")
-	public void deleteForum(@PathVariable("id") Integer id) {
+	public ResponseEntity<?>  deleteForum(@PathVariable("id") Integer id) {
 		Forum forum = repo.findById(id);
-		repo.delete(forum);
 		
+		if(forum !=null) {
+			repo.delete(forum);
+			return new ResponseEntity<>(forum,HttpStatus.OK);
+			
+	}else {
+		ErrorDetail errorDetail = new ErrorDetail();
+		errorDetail.setStatus(HttpStatus.NOT_FOUND.value());
+		errorDetail.setMessage("Forum with id" +  id  + "not found");
+		return new ResponseEntity<>(errorDetail,HttpStatus.NOT_FOUND);
+	}
 	}
 	@PutMapping("/forum/{id}/love")
 	public Forum editLove(@RequestBody Forum forum) {
