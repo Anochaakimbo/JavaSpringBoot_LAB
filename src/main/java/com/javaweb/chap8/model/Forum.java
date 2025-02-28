@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 
 @Entity
 public class Forum {
@@ -51,5 +52,10 @@ public class Forum {
 		this.post_date = post_date;
 	}
 	
+	 @PrePersist
+	    public void onPrePersist() {
+	        this.post_date = new Date(); // ตั้งค่า post_date เป็นเวลาปัจจุบัน
+	    }
+	}
 	
-}
+

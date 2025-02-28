@@ -1,14 +1,21 @@
 package com.javaweb.chap8;
 
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,80 +24,50 @@ import com.javaweb.chap8.model.CustomerInterfaceRepo;
 import com.javaweb.chap8.model.Forum;
 import com.javaweb.chap8.model.ForumInterfaceRepository;
 
-@Controller
+@RestController
+@RequestMapping("/api/v2")
 public class ForumController {
 	@Autowired
 	ForumInterfaceRepository repo;
 	
-	@GetMapping("/insertF")
-	public String saveForum1() {
-		Date d = new Date();
-		Forum f = new Forum();
-		f.setDetail("OK HOW ARE WE TODAY");
-		f.setAuthor("ANOCHAXX");
-		f.setLove(15);
-		f.setPost_date(d);
-		repo.save(f);
-		return "Add successfully";
-	}
-	
-	@GetMapping("/insertForum")
-	public String saveForum(@RequestParam("detail") String detail,@RequestParam("author") String author,Model m) {
-	    Date d = new Date();
-	    Forum f = new Forum();
-	    f.setDetail(detail);      
-	    f.setAuthor(author);       
-	    f.setLove(0);
-	    f.setPost_date(d);
-	    repo.save(f);               
-	    return "redirect:/showForum";
+	@PostMapping("/forum")
+	public Forum saveForum(@RequestBody Forum forum) {
+	    return repo.save(forum);
 	}
 
 	
-	@GetMapping("/showForum")
-	public String findAllForum(Model m) {
-		Iterable<Forum> c = repo.findAll();
-		m.addAttribute("allForums",c);
-		return "/forum-table";
-	
-	}
-	
-	@GetMapping("/updateForm/{id}")
-	public String loadForm(@PathVariable int id,Model m) {
-		Forum f =  repo.findById(id);
-		System.out.println(id);
-		m.addAttribute("Forum",f);
-		return "/update-form";
+	@GetMapping("/forum/{id}")
+	public ResponseEntity<?> getForum(@PathVariable Integer id) {
+		Forum forum = repo.findById(id);
+		
+		if(forum !=null) {
+			return new ResponseEntity<>(forum,HttpStatus.OK);
+			
+		}else {
+			ErrorDetail errorDetail = new ErrorDetail();
+			errorDetail.setStatus(HttpStatus.NOT_FOUND.value());
+			errorDetail.setMessage("Forum with id" + id +"not found");
+			return new ResponseEntity<>(errorDetail,HttpStatus.NOT_FOUND);
+		}
 		
 	}
 	
-	@PostMapping("/updateForum")
-	public String updateForum(@ModelAttribute Forum editForum,Model m) {
-		Forum oldForum = repo.findById(editForum.getId());
-		oldForum.setAuthor(editForum.getAuthor());
-		oldForum.setDetail(editForum.getDetail());
-		oldForum.setLove(editForum.getLove());
-		repo.save(oldForum);
-		return "redirect:/showForum";
-		
+	@GetMapping("/forum")
+	public Iterable<Forum> getAllForum() {
+		return repo.findAll();
 	}
 	
-	@GetMapping("/deleteForum")
-	public String deleteForum(@RequestParam int id,Model m) {
-		Forum f =  repo.findById(id);
-		repo.delete(f);
-		return "redirect:/showForum";
+	@DeleteMapping("/forum/{id}")
+	public void deleteForum(@PathVariable("id") Integer id) {
+		Forum forum = repo.findById(id);
+		repo.delete(forum);
 		
 	}
-	@GetMapping("/loveAdd/{id}")
-	public String lovePress(@PathVariable int id, Model m) {
-	    Forum f = repo.findById(id); 
-	    if (f != null) {
-	        f.setLove(f.getLove() + 1); 
-	        repo.save(f); 
-	    }
-	    return "redirect:/showForum";
-	}
-
+	@PutMapping("/forum/{id}/love")
+	public Forum editLove(@RequestBody Forum forum) {
+	    Forum f = repo.findById(forum.getId()); 
+	    f.setLove(forum.getLove());
+	    return repo.save(f);
+}
 }
 
